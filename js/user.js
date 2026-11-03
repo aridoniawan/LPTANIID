@@ -430,7 +430,7 @@ const UserDash = {
          <p class="muted mt-2">Transfer sesuai total di invoice ke rekening di atas, lalu <b>upload bukti pembayaran</b>. Setelah admin menyetujui, tombol <b>Join Discord</b> akan aktif.</p>
          <div class="flex mt-2" style="justify-content:flex-end">
            <button class="btn btn-primary" id="join-success-upload">📤 Upload Bukti Sekarang</button>
-           <button class="btn btn-ghost" onclick="Modal.close()">Nanti Dulu</button>
+           <button class="btn btn-ghost" onclick="Modal.close(); UserDash.showPanel('payment')">Nanti Dulu</button>
          </div>`,
         { sticky: true }
       );
@@ -516,6 +516,10 @@ const UserDash = {
     const base = Number(t.originalAmount || t.amount || 0);
     const discount = Math.max(0, base - Number(t.amount || 0));
     const pkg = t.type === "upgrade" ? "⭐ Upgrade Premium → VIP" : t.tier === "vip" ? "👑 VIP" : "🌱 Premium";
+    const hasRek = !!(method || t.paymentMethodName);
+    const step1 = hasRek
+      ? `Transfer tepat sebesar <b>${Helpers.fmtIDR(t.amount)}</b> ke rekening di atas.`
+      : `Hubungi admin untuk info rekening tujuan, lalu transfer tepat sebesar <b>${Helpers.fmtIDR(t.amount)}</b>.`;
     Modal.open(
       `<h3>🧾 Invoice Transaksi</h3>
        <div class="info-box mt-2">ID Transaksi: <b style="letter-spacing:0.08em">${t.id.slice(0, 8).toUpperCase()}</b> &nbsp;·&nbsp; ${Helpers.statusBadge(t.status)}</div>
@@ -525,6 +529,15 @@ const UserDash = {
          <div class="invoice-row invoice-total"><span>Total yang Harus Dibayar</span><span>${Helpers.fmtIDR(t.amount)}</span></div>
        </div>
        ${method ? this._rekeningBox(method) : t.paymentMethodName ? `<div class="card mt-2"><p class="small">Rekening tujuan: <b>${Helpers.esc(t.paymentMethodName)}</b></p></div>` : ""}
+       <div class="card mt-2">
+         <h4 class="mb-1">📌 Cara Pembayaran</h4>
+         <ol class="small" style="padding-left:1.2rem;line-height:1.7">
+           <li>${step1}</li>
+           <li>Simpan bukti transfer (screenshot / struk).</li>
+           <li>Klik tombol <b>📤 Upload Bukti</b> di bawah untuk mengirim bukti.</li>
+           <li>Admin memverifikasi (maks. 1x24 jam). Setelah disetujui, akses Discord & fitur member aktif.</li>
+         </ol>
+       </div>
        ${t.proofUrl ? `<div class="small mt-2">Bukti terupload: <a href="${Helpers.esc(t.proofUrl)}" target="_blank" rel="noopener">Lihat</a></div>` : ""}
        <div class="flex mt-2" style="justify-content:flex-end">
          ${t.status === "pending" || t.status === "rejected" ? `<button class="btn btn-primary" id="invoice-upload-btn">📤 Upload Bukti</button>` : ""}
@@ -823,7 +836,7 @@ const UserDash = {
              <p class="muted mt-2">Transfer sesuai total di invoice ke rekening di atas, lalu <b>upload bukti pembayaran</b> di panel Konfirmasi Pembayaran.</p>
              <div class="flex mt-2" style="justify-content:flex-end">
                <button class="btn btn-primary" id="upgrade-success-upload">📤 Upload Bukti Sekarang</button>
-               <button class="btn btn-ghost" onclick="Modal.close()">Nanti Dulu</button>
+               <button class="btn btn-ghost" onclick="Modal.close(); UserDash.showPanel('payment')">Nanti Dulu</button>
              </div>`,
             { sticky: true }
           );
