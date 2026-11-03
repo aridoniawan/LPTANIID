@@ -238,9 +238,9 @@ const AdminDash = {
     Modal.open(
       `<h3>🖼️ Bukti Pembayaran</h3>
        <p class="small muted">${Helpers.esc(t.userName || "")} — ${t.type === "upgrade" ? "Upgrade VIP" : "Join"} ${t.tier} (${Helpers.fmtIDR(t.amount)})</p>
-       <div class="mt-2"><img src="${t.proofUrl}" style="width:100%;border-radius:10px" alt="Bukti pembayaran" /></div>
+       <div class="mt-2"><img src="${Helpers.esc(t.proofUrl)}" style="width:100%;border-radius:10px" alt="Bukti pembayaran" /></div>
        <div class="flex mt-2" style="justify-content:space-between">
-         <a class="btn btn-outline btn-sm" href="${t.proofUrl}" target="_blank" rel="noopener" download>⬇️ Download Bukti</a>
+         <a class="btn btn-outline btn-sm" href="${Helpers.esc(t.proofUrl)}" target="_blank" rel="noopener" download>⬇️ Download Bukti</a>
          <button class="btn btn-ghost btn-sm" onclick="Modal.close()">Tutup</button>
        </div>`,
       { maxWidth: "640px" }

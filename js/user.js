@@ -256,6 +256,48 @@ const UserDash = {
       </div>`;
   },
 
+  _rekeningBox(method) {
+    if (!method) return "";
+    return `
+   <div class="card mt-2" style="border-left:4px solid var(--neon-dark)">
+     <h4 class="mb-1">🏦 Transfer ke Rekening</h4>
+     <div class="invoice-row"><span>Bank</span><b>${Helpers.esc(method.bankName)}</b></div>
+     <div class="invoice-row"><span>Atas Nama</span><b>${Helpers.esc(method.accountName)}</b></div>
+     <div class="invoice-row"><span>No. Rekening</span><b style="letter-spacing:0.05em">${Helpers.esc(method.accountNumber)}</b></div>
+     <button class="btn btn-outline btn-sm mt-2" type="button" id="copy-rek-btn">📋 Salin No. Rekening</button>
+   </div>`;
+  },
+
+  _bindCopyRek(accNumber) {
+    const cb = document.getElementById("copy-rek-btn");
+    if (!cb) return;
+    cb.onclick = () => this.copyText(accNumber);
+  },
+
+  copyText(text) {
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      return ok;
+    };
+    const success = () => Toast.show("Nomor rekening berhasil disalin! 📋", "success");
+    const failToast = () => Toast.show("Gagal menyalin otomatis. Salin manual ya.", "info");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(success).catch(() => (fallback() ? success() : failToast()));
+    } else if (fallback()) {
+      success();
+    } else {
+      failToast();
+    }
+  },
+
   async applyPromo() {
     const input = document.getElementById("join-promo-code");
     const msgEl = document.getElementById("join-promo-msg");
@@ -384,16 +426,18 @@ const UserDash = {
            ${info.promo ? `<div class="invoice-row"><span>🎟️ Diskon <b>${Helpers.esc(info.promo.code)}</b></span><span style="color:var(--neon-dark)">−${Helpers.fmtIDR(info.discount)}</span></div>` : ""}
            <div class="invoice-row invoice-total"><span>Total yang Harus Dibayar</span><span>${Helpers.fmtIDR(info.total)}</span></div>
          </div>
-         <p class="muted mt-2">Sekarang <b>transfer sesuai total di invoice</b> ke rekening yang kamu pilih, lalu <b>upload bukti pembayaran</b> di panel Konfirmasi Pembayaran. Setelah admin menyetujui, tombol <b>Join Discord</b> akan aktif.</p>
+         ${this._rekeningBox(method)}
+         <p class="muted mt-2">Transfer sesuai total di invoice ke rekening di atas, lalu <b>upload bukti pembayaran</b>. Setelah admin menyetujui, tombol <b>Join Discord</b> akan aktif.</p>
          <div class="flex mt-2" style="justify-content:flex-end">
            <button class="btn btn-primary" id="join-success-upload">📤 Upload Bukti Sekarang</button>
            <button class="btn btn-ghost" onclick="Modal.close()">Nanti Dulu</button>
          </div>`,
         { sticky: true }
       );
+      this._bindCopyRek(method.accountNumber);
       document.getElementById("join-success-upload").onclick = () => {
         Modal.close();
-        this.showPanel("payment");
+        this.openUploadProof(id);
       };
     } catch (err) {
       errEl.textContent = err.message;
@@ -447,8 +491,9 @@ const UserDash = {
               <td>${t.tier === "vip" ? "👑 VIP" : "🌱 Premium"}</td>
               <td>${Helpers.fmtIDR(t.amount)}${t.promoCode ? `<div class="small" style="color:var(--neon-dark)">🎟️ ${Helpers.esc(t.promoCode)}</div>` : ""}</td>
               <td>${Helpers.statusBadge(t.status)}${t.note ? `<div class="small muted mt-1">💬 ${Helpers.esc(t.note)}</div>` : ""}</td>
-              <td>${t.proofUrl ? `<a href="${t.proofUrl}" target="_blank" rel="noopener">Lihat</a>` : "-"}</td>
+              <td>${t.proofUrl ? `<a href="${Helpers.esc(t.proofUrl)}" target="_blank" rel="noopener">Lihat</a>` : "-"}</td>
               <td>
+                <button class="btn btn-ghost btn-sm" onclick="UserDash.viewInvoice('${t.id}')">🧾 Invoice</button>
                 ${t.status === "pending"
                   ? `<button class="btn btn-outline btn-sm" onclick="UserDash.openUploadProof('${t.id}')">📤 Upload Bukti</button>`
                   : t.status === "rejected"
@@ -458,6 +503,41 @@ const UserDash = {
             </tr>`).join("")}
         </table></div>`
       : "";
+  },
+
+  async viewInvoice(txId) {
+    const t = await getTransaction(txId);
+    if (!t) {
+      Toast.show("Transaksi tidak ditemukan.", "error");
+      return;
+    }
+    const pms = await getPaymentMethods(true);
+    const method = pms.find((p) => p.id === t.paymentMethodId) || null;
+    const base = Number(t.originalAmount || t.amount || 0);
+    const discount = Math.max(0, base - Number(t.amount || 0));
+    const pkg = t.type === "upgrade" ? "⭐ Upgrade Premium → VIP" : t.tier === "vip" ? "👑 VIP" : "🌱 Premium";
+    Modal.open(
+      `<h3>🧾 Invoice Transaksi</h3>
+       <div class="info-box mt-2">ID Transaksi: <b style="letter-spacing:0.08em">${t.id.slice(0, 8).toUpperCase()}</b> &nbsp;·&nbsp; ${Helpers.statusBadge(t.status)}</div>
+       <div class="card invoice-box mt-2">
+         <div class="invoice-row"><span>Paket: <b>${pkg}</b></span><span>${Helpers.fmtIDR(base)}</span></div>
+         ${t.promoCode ? `<div class="invoice-row"><span>🎟️ Diskon <b>${Helpers.esc(t.promoCode)}</b>${t.promoType ? ` (${t.promoType === "fixed" ? Helpers.fmtIDR(t.promoValue) : Number(t.promoValue) + "%"})` : ""}</span><span style="color:var(--neon-dark)">−${Helpers.fmtIDR(discount)}</span></div>` : ""}
+         <div class="invoice-row invoice-total"><span>Total yang Harus Dibayar</span><span>${Helpers.fmtIDR(t.amount)}</span></div>
+       </div>
+       ${method ? this._rekeningBox(method) : t.paymentMethodName ? `<div class="card mt-2"><p class="small">Rekening tujuan: <b>${Helpers.esc(t.paymentMethodName)}</b></p></div>` : ""}
+       ${t.proofUrl ? `<div class="small mt-2">Bukti terupload: <a href="${Helpers.esc(t.proofUrl)}" target="_blank" rel="noopener">Lihat</a></div>` : ""}
+       <div class="flex mt-2" style="justify-content:flex-end">
+         ${t.status === "pending" || t.status === "rejected" ? `<button class="btn btn-primary" id="invoice-upload-btn">📤 Upload Bukti</button>` : ""}
+         <button class="btn btn-ghost" onclick="Modal.close()">Tutup</button>
+       </div>`,
+      { sticky: true, maxWidth: "480px" }
+    );
+    if (method) this._bindCopyRek(method.accountNumber);
+    const upBtn = document.getElementById("invoice-upload-btn");
+    if (upBtn) upBtn.onclick = () => {
+      Modal.close();
+      this.openUploadProof(txId);
+    };
   },
 
   openUploadProof(txId) {
@@ -685,27 +765,90 @@ const UserDash = {
   },
 
   requestUpgrade() {
-    Modal.confirm({
-      title: "⭐ Upgrade ke VIP",
-      message: `Biaya upgrade sebesar ${Helpers.fmtIDR(Math.max(0, (this.settings.vipPrice || 0) - (this.settings.premiumPrice || 0)))}. Lanjutkan untuk membuat transaksi upgrade?`,
-      okText: "Lanjutkan",
-      onOk: async () => {
-        await createTransaction({
-          userId: this.user.uid,
-          userEmail: this.user.email,
-          userName: this.user.name,
-          type: "upgrade",
-          tier: "vip",
-          amount: Math.max(0, (this.settings.vipPrice || 0) - (this.settings.premiumPrice || 0)),
-          paymentMethodId: "",
-          paymentMethodName: "",
-          discordId: this.user.discordId || "",
-        });
-        Toast.show("Transaksi upgrade dibuat! Upload bukti di menu Konfirmasi Pembayaran.", "success");
-        await this.renderAll();
-        this.showPanel("payment");
-      },
-    });
+    const price = Math.max(0, (this.settings.vipPrice || 0) - (this.settings.premiumPrice || 0));
+    const pms = this.paymentMethods;
+    if (!pms.length) {
+      Toast.show("Belum ada metode pembayaran. Hubungi admin.", "error");
+      return;
+    }
+    if (!pms.find((p) => p.id === this.upgradeMethodId)) this.upgradeMethodId = pms[0].id;
+
+    const render = () => {
+      document.getElementById("modal-box").innerHTML = `
+        <h3>⭐ Upgrade Premium → VIP</h3>
+        <p class="muted mt-1">Biaya upgrade: <b style="color:var(--neon-dark);font-size:1.3rem">${Helpers.fmtIDR(price)}</b></p>
+        <p class="small muted mt-1">Pilih metode pembayaran untuk transfer:</p>
+        <div class="mt-1">
+          ${pms.map((p) => `
+            <div class="card pricing-card ${this.upgradeMethodId === p.id ? "selected" : ""}" style="text-align:left" onclick="UserDash.pickUpgradeMethod('${p.id}')">
+              <div class="price-tier" style="font-size:1rem">🏦 ${Helpers.esc(p.bankName)}</div>
+              <p class="muted small">a.n. <b>${Helpers.esc(p.accountName)}</b></p>
+              <p class="small" style="letter-spacing:0.05em;font-weight:700">${Helpers.esc(p.accountNumber)}</p>
+            </div>`).join("")}
+        </div>
+        <div class="error-text" id="upgrade-error"></div>
+        <div class="flex mt-2" style="justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="Modal.close()">Batal</button>
+          <button class="btn btn-primary" id="upgrade-create-btn">Buat Transaksi</button>
+        </div>`;
+      document.getElementById("upgrade-create-btn").onclick = async () => {
+        const method = pms.find((p) => p.id === this.upgradeMethodId);
+        const btn = document.getElementById("upgrade-create-btn");
+        const errEl = document.getElementById("upgrade-error");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner" style="border-color:rgba(0,0,0,0.25);border-top-color:#04210f"></span> Memproses...';
+        try {
+          const id = await createTransaction({
+            userId: this.user.uid,
+            userEmail: this.user.email,
+            userName: this.user.name,
+            type: "upgrade",
+            tier: "vip",
+            amount: price,
+            originalAmount: price,
+            paymentMethodId: method.id,
+            paymentMethodName: `${method.bankName} - ${method.accountName} - ${method.accountNumber}`,
+            discordId: this.user.discordId || "",
+          });
+          await this.renderAll();
+          Modal.open(
+            `<h3>✅ Transaksi Upgrade Dibuat!</h3>
+             <div class="info-box mt-2">ID Transaksi kamu: <b style="font-size:1.15rem;letter-spacing:0.08em">${id.slice(0, 8).toUpperCase()}</b></div>
+             <div class="card invoice-box mt-2">
+               <h3 class="mb-1">🧾 Invoice Pembayaran</h3>
+               <div class="invoice-row"><span>Paket: <b>⭐ Upgrade Premium → VIP</b></span><span>${Helpers.fmtIDR(price)}</span></div>
+               <div class="invoice-row invoice-total"><span>Total yang Harus Dibayar</span><span>${Helpers.fmtIDR(price)}</span></div>
+             </div>
+             ${this._rekeningBox(method)}
+             <p class="muted mt-2">Transfer sesuai total di invoice ke rekening di atas, lalu <b>upload bukti pembayaran</b> di panel Konfirmasi Pembayaran.</p>
+             <div class="flex mt-2" style="justify-content:flex-end">
+               <button class="btn btn-primary" id="upgrade-success-upload">📤 Upload Bukti Sekarang</button>
+               <button class="btn btn-ghost" onclick="Modal.close()">Nanti Dulu</button>
+             </div>`,
+            { sticky: true }
+          );
+          this._bindCopyRek(method.accountNumber);
+          document.getElementById("upgrade-success-upload").onclick = () => {
+            Modal.close();
+            this.openUploadProof(id);
+          };
+        } catch (e) {
+          errEl.textContent = e.message;
+          errEl.style.display = "block";
+          btn.disabled = false;
+          btn.textContent = "Buat Transaksi";
+        }
+      };
+    };
+
+    Modal.open("", { sticky: true, maxWidth: "480px" });
+    this._upgradeRender = render;
+    render();
+  },
+
+  pickUpgradeMethod(id) {
+    this.upgradeMethodId = id;
+    if (this._upgradeRender) this._upgradeRender();
   },
 
   /* ============ CHANGE PASSWORD ============ */
