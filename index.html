@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LP Tani — Belajar Jadi Liquidity Provider di Robinhood</title>
+  <meta name="description" content="LP Tani — Komunitas belajar menjadi Liquidity Provider on-chain di jaringan Robinhood. Belajar full di Discord bersama pengajar berpengalaman." />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="cursor-glow"></div>
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav-logo" onclick="Router.go('landing')">
+      <img id="nav-logo-img" src="assets/logo.png" alt="LP Tani" />
+      <span class="logo-text">LP<span>TANI</span></span>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="#tentang" onclick="Router.go('landing','tentang')">Tentang LP</a>
+      <a href="#pengajar" onclick="Router.go('landing','pengajar')">Pengajar</a>
+      <a href="#materi" onclick="Router.go('landing','materi')">Materi</a>
+      <a href="#join" onclick="Router.go('landing','join')">Join Member</a>
+      <a href="#kontak" onclick="Router.go('landing','kontak')">Kontak</a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" id="theme-toggle" title="Ganti tema" onclick="Theme.toggle()">🌙</button>
+      <button class="icon-btn" id="nav-burger" title="Menu" onclick="toggleNavMenu()">☰</button>
+      <span id="nav-auth-area"></span>
+    </div>
+  </nav>
+
+  <!-- ============ LOADING ============ -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner" style="width:44px;height:44px;border-width:4px"></div>
+    <div class="logo-text">LP<span>TANI</span></div>
+  </div>
+
+  <!-- ============ VIEW: LANDING ============ -->
+  <main id="view-landing" class="view">
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="container">
+        <div class="hero-grid">
+          <div class="reveal visible">
+            <span class="hero-badge" id="hero-badge">🌱 Komunitas Belajar On-Chain #1</span>
+            <h1 id="hero-title">Belajar Jadi <span class="gradient-text">Liquidity Provider</span> di Robinhood</h1>
+            <p class="lead" id="hero-sub">Belajar full di Discord bersama pengajar berpengalaman. Mulai dari nol sampai paham cara kerja Liquidity Pool on-chain di jaringan Robinhood — bahkan saat salah entry pun tetap untung.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="hero-btn-register" onclick="Router.go('register')">🚀 Daftar Sekarang</button>
+              <button class="btn btn-outline" id="hero-btn-packages" onclick="Router.go('landing','join')">Lihat Paket Member</button>
+            </div>
+            <div class="hero-stats">
+              <div><div class="stat-num" id="stat-mentoring">5x</div><div class="stat-label" id="stat-mentoring-label">Mentoring VIP</div></div>
+              <div><div class="stat-num" id="stat-support">24/7</div><div class="stat-label" id="stat-support-label">Support Discord</div></div>
+            </div>
+          </div>
+          <div class="reveal reveal-delay-1 visible" id="hero-media-wrap">
+            <div class="media-frame" id="hero-media">
+              <img src="assets/lp-hero.png" alt="Liquidity Provider Robinhood" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TENTANG LP -->
+    <section class="section" id="tentang">
+      <div class="container">
+        <h2 class="section-title reveal" id="tentang-title">Apa itu <span class="gradient-text">Liquidity Provider</span>?</h2>
+        <p class="section-sub reveal" id="tentang-sub">Liquidity Provider (LP) adalah orang yang menyediakan likuiditas ke pool on-chain dan mendapatkan fee dari setiap transaksi. Berbeda dengan trading biasa yang hanya untung saat harga naik.</p>
+        <div class="compare-wrap mt-2">
+          <div class="compare-grid">
+            <div class="card compare-card bad reveal">
+              <div class="compare-media" id="media-vs">
+                <img src="assets/trading-manual.png" alt="Trading jual beli manual" />
+              </div>
+              <h3 id="vs-bad-title">Trading Biasa (Jual Beli Manual)</h3>
+              <p class="muted mt-1" id="vs-bad-text">Harus bisa tebak arah pasar. Salah entry = rugi. Stres pantau chart 24 jam, emosi naik turun, dan sering kena stop loss.</p>
+            </div>
+            <div class="vs-badge" id="vs-badge">VS</div>
+            <div class="card compare-card good reveal reveal-delay-1">
+              <div class="compare-media" id="media-video">
+                <video autoplay muted loop playsinline preload="none" poster="assets/lp-hero.png"></video>
+              </div>
+              <h3 id="vs-good-title">Jadi Liquidity Provider</h3>
+              <p class="muted mt-1" id="vs-good-text">Dapat fee dari setiap transaksi di pool. Bahkan saat harga bergerak melawan posisi, fee yang terkumpul bisa menutupi kerugian — salah entry pun tetap untung.</p>
+            </div>
+          </div>
+        </div>
+        <div class="media-caption" id="media-caption">Perbandingan: trading manual vs menjadi Liquidity Provider — salah entry pun tetap untung.</div>
+      </div>
+    </section>
+
+    <!-- KENAPA HARUS BELAJAR -->
+    <section class="section" id="kenapa" style="background:var(--bg-soft)">
+      <div class="container">
+        <h2 class="section-title reveal" id="kenapa-title">Kenapa Harus <span class="gradient-text">Belajar Jadi LP?</span></h2>
+        <p class="section-sub reveal" id="kenapa-sub">Jangan asal masuk pool tanpa ilmu. Tanpa pemahaman, kamu bisa rugi karena impermanent loss atau salah pilih pool.</p>
+        <div class="grid-4 mt-2" id="kenapa-grid">
+          <div class="card reveal"><div class="feature-icon">💎</div><h3 id="kenapa-1-title">Passive Income</h3><p class="muted small" id="kenapa-1-text">Fee masuk otomatis dari setiap transaksi di pool — tanpa pantau chart 24 jam.</p></div>
+          <div class="card reveal reveal-delay-1"><div class="feature-icon">🛡️</div><h3 id="kenapa-2-title">Kelola Risiko</h3><p class="muted small" id="kenapa-2-text">Pahami impermanent loss & cara memilih pool yang aman.</p></div>
+          <div class="card reveal reveal-delay-2"><div class="feature-icon">🧠</div><h3 id="kenapa-3-title">Ilmu Terstruktur</h3><p class="muted small" id="kenapa-3-text">Materi lengkap dari nol sampai mahir, dibimbing pengajar aktif.</p></div>
+          <div class="card reveal reveal-delay-3"><div class="feature-icon">🤝</div><h3 id="kenapa-4-title">Komunitas Discord</h3><p class="muted small" id="kenapa-4-text">Diskusi & tanya jawab langsung di server Discord LP Tani.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PENGAJAR -->
+    <section class="section" id="pengajar">
+      <div class="container">
+        <h2 class="section-title reveal" id="pengajar-title">Kenalan dengan <span class="gradient-text">Pengajar</span></h2>
+        <p class="section-sub reveal" id="pengajar-sub">Belajar langsung dari praktisi dengan winrate <b>96–100%</b> di setiap sesi Liquidity Provider di Robinhood. Bukan janji — tapi bukti.</p>
+        <div class="card reveal mt-2" id="pengajar-card">
+          <h3 id="pengajar-name">🌾 LP Tani Team</h3>
+          <p class="muted mt-1" id="pengajar-bio">Pengajar aktif di jaringan Robinhood dengan rekam jejak luar biasa: <b>winrate 96–100%</b> selama menjadi Liquidity Provider on-chain. Semua hasil nyata dan bisa kamu buktikan sendiri — lihat langsung bukti PNL asli pengajar di bawah ini.</p>
+        </div>
+        <h3 class="center mt-3 reveal" id="pengajar-pnl-heading">📸 Bukti Hasil PNL Asli Pengajar</h3>
+        <div class="grid-3 mt-2" id="pnl-gallery"></div>
+      </div>
+    </section>
+
+    <!-- MATERI -->
+    <section class="section" id="materi" style="background:var(--bg-soft)">
+      <div class="container">
+        <h2 class="section-title reveal" id="materi-title">Materi yang <span class="gradient-text">Akan Diajarkan</span></h2>
+        <p class="section-sub reveal" id="materi-sub">Kurikulum lengkap dari dasar sampai strategi lanjutan.</p>
+        <div class="grid-3 mt-2" id="materi-grid">
+          <div class="card reveal"><div class="feature-icon">1️⃣</div><h3 id="materi-1-title">Dasar Blockchain & On-Chain</h3><p class="muted small" id="materi-1-text">Pahami cara kerja jaringan, wallet, dan transaksi on-chain.</p></div>
+          <div class="card reveal reveal-delay-1"><div class="feature-icon">2️⃣</div><h3 id="materi-2-title">Mengenal Jaringan Robinhood</h3><p class="muted small" id="materi-2-text">Ekosistem, token, dan peluang LP di jaringan Robinhood.</p></div>
+          <div class="card reveal reveal-delay-2"><div class="feature-icon">3️⃣</div><h3 id="materi-3-title">Liquidity Pool & Fee</h3><p class="muted small" id="materi-3-text">Cara kerja pool, fee transaksi, dan bagaimana LP mendapat untung.</p></div>
+          <div class="card reveal"><div class="feature-icon">4️⃣</div><h3 id="materi-4-title">Impermanent Loss</h3><p class="muted small" id="materi-4-text">Memahami dan mengelola risiko terbesar seorang LP.</p></div>
+          <div class="card reveal reveal-delay-1"><div class="feature-icon">5️⃣</div><h3 id="materi-5-title">Strategi Entry & Exit</h3><p class="muted small" id="materi-5-text">Kapan masuk pool, kapan keluar, dan strategi compounding.</p></div>
+          <div class="card reveal reveal-delay-2"><div class="feature-icon">6️⃣</div><h3 id="materi-6-title">Praktik Langsung</h3><p class="muted small" id="materi-6-text">Praktik bareng di Discord dengan bimbingan pengajar.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- JOIN MEMBER / PRICING -->
+    <section class="section" id="join">
+      <div class="container">
+        <h2 class="section-title reveal" id="join-title">Gabung Jadi <span class="gradient-text">Member LP Tani</span></h2>
+        <p class="section-sub reveal" id="join-sub">Pilih paket yang sesuai kebutuhanmu. Semua pembelajaran dilakukan di Discord.</p>
+        <div class="center" id="join-status-area"></div>
+        <div class="grid-2 mt-2" style="max-width:760px;margin:2rem auto 0" id="pricing-cards"></div>
+        <div class="center mt-3" id="join-cta-area"></div>
+      </div>
+    </section>
+
+    <!-- SYARAT & KETENTUAN LINKS -->
+    <section class="section" id="legal" style="background:var(--bg-soft)">
+      <div class="container">
+        <h2 class="section-title reveal" id="legal-title">Informasi <span class="gradient-text">Penting</span></h2>
+        <div class="grid-3 mt-2">
+          <a class="card reveal" href="#" onclick="Legal.open('syarat'); return false;">
+            <div class="feature-icon">📜</div>
+            <h3 id="legal-syarat-title">Syarat & Ketentuan</h3>
+            <p class="muted small" id="legal-syarat-desc">Baca aturan lengkap sebelum bergabung menjadi member.</p>
+          </a>
+          <a class="card reveal reveal-delay-1" href="#" onclick="Legal.open('refund'); return false;">
+            <div class="feature-icon">💰</div>
+            <h3 id="legal-refund-title">Kebijakan Refund</h3>
+            <p class="muted small" id="legal-refund-desc">Pahami kebijakan pengembalian dana kami.</p>
+          </a>
+          <a class="card reveal reveal-delay-2" href="#" onclick="Legal.open('risiko'); return false;">
+            <div class="feature-icon">⚠️</div>
+            <h3 id="legal-risiko-title">Disclaimer Risiko</h3>
+            <p class="muted small" id="legal-risiko-desc">Semua aktivitas on-chain memiliki risiko. Pahami sebelum bertransaksi.</p>
+          </a>
+        </div>
+        <div class="mt-3" id="terms-list"></div>
+      </div>
+    </section>
+
+    <!-- KONTAK -->
+    <section class="section" id="kontak">
+      <div class="container">
+        <h2 class="section-title reveal" id="kontak-title">Hubungi <span class="gradient-text">Kami</span></h2>
+        <p class="section-sub reveal" id="kontak-sub">Ada pertanyaan? Tim LP Tani siap membantu.</p>
+        <div class="contact-row center" style="justify-content:center" id="kontak-list">
+          <a class="contact-item" id="kontak-discord" href="https://discord.gg/lptani" target="_blank" rel="noopener">💬 Discord LP Tani</a>
+          <a class="contact-item" id="kontak-email" href="mailto:admin@lptani.id">✉️ admin@lptani.id</a>
+          <a class="contact-item" id="kontak-telegram" href="https://t.me/lptani" target="_blank" rel="noopener">📱 Telegram</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="logo-text mb-1">LP<span>TANI</span></div>
+            <p id="footer-tagline">Komunitas belajar menjadi Liquidity Provider on-chain di jaringan Robinhood. Belajar full di Discord.</p>
+          </div>
+          <div>
+            <h4>Menu</h4>
+            <a href="#tentang" onclick="Router.go('landing','tentang')">Tentang LP</a>
+            <a href="#pengajar" onclick="Router.go('landing','pengajar')">Pengajar</a>
+            <a href="#materi" onclick="Router.go('landing','materi')">Materi</a>
+            <a href="#join" onclick="Router.go('landing','join')">Join Member</a>
+          </div>
+          <div>
+            <h4>Legal</h4>
+            <a href="#" onclick="Legal.open('syarat'); return false;">Syarat & Ketentuan</a>
+            <a href="#" onclick="Legal.open('refund'); return false;">Kebijakan Refund</a>
+            <a href="#" onclick="Legal.open('risiko'); return false;">Disclaimer Risiko</a>
+          </div>
+          <div>
+            <h4>Kontak</h4>
+            <p id="footer-kontak-1">💬 Discord LP Tani</p>
+            <p id="footer-kontak-2">✉️ admin@lptani.id</p>
+          </div>
+        </div>
+        <div class="footer-bottom" id="footer-bottom">© 2026 LP Tani. All rights reserved. Not financial advice.</div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ============ VIEW: AUTH (Login/Register/Forgot) ============ -->
+  <main id="view-auth" class="view">
+    <div class="page-wrap">
+      <div class="container" style="max-width:520px;padding-top:3rem;padding-bottom:4rem">
+        <div class="card">
+          <div class="center mb-2">
+            <div class="logo-text" style="font-size:1.6rem">LP<span>TANI</span></div>
+            <p class="muted small mt-1" id="auth-subtitle">Login untuk lanjut ke dashboard member</p>
+          </div>
+          <div class="tabs" style="justify-content:center" id="auth-tabs">
+            <button class="tab active" data-auth-tab="login" type="button" onclick="Auth.switchTab('login')">Login</button>
+            <button class="tab" data-auth-tab="register" type="button" onclick="Auth.switchTab('register')">Registrasi</button>
+            <button class="tab" data-auth-tab="forgot" type="button" onclick="Auth.switchTab('forgot')">Lupa Password</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form id="form-login" onsubmit="return Auth.login(event)">
+            <div class="form-group">
+              <label>Email <span class="req">*</span></label>
+              <input type="email" id="login-email" placeholder="nama@gmail.com" required />
+            </div>
+            <div class="form-group">
+              <label>Password <span class="req">*</span></label>
+              <input type="password" id="login-password" placeholder="••••••••" required />
+            </div>
+            <div class="error-text" id="login-error"></div>
+            <button class="btn btn-primary" style="width:100%" type="submit" id="login-btn">Masuk</button>
+            <p class="center small mt-1 muted">Belum punya akun? <a href="#" onclick="Auth.switchTab('register');return false">Registrasi di sini</a></p>
+          </form>
+
+          <!-- REGISTER -->
+          <form id="form-register" class="hidden" onsubmit="return Auth.register(event)">
+            <div class="form-group">
+              <label>Nama Lengkap <span class="req">*</span></label>
+              <input type="text" id="reg-name" placeholder="Nama kamu" required />
+            </div>
+            <div class="form-group">
+              <label>Email (Gmail) <span class="req">*</span></label>
+              <input type="email" id="reg-email" placeholder="nama@gmail.com" required />
+              <div class="hint">Gunakan Gmail aktif. Link verifikasi & reset password dikirim ke email ini.</div>
+            </div>
+            <div class="form-group">
+              <label>No. HP / WhatsApp <span class="req">*</span></label>
+              <input type="tel" id="reg-phone" placeholder="08xxxxxxxxxx" required />
+              <div class="hint">Format: 08xxxxxxxxxx (digunakan untuk verifikasi & kontak admin)</div>
+            </div>
+            <div class="form-group">
+              <label>Password <span class="req">*</span></label>
+              <input type="password" id="reg-password" placeholder="Minimal 8 karakter" minlength="8" required />
+            </div>
+            <div class="form-group">
+              <label>Ulangi Password <span class="req">*</span></label>
+              <input type="password" id="reg-password2" placeholder="Ketik ulang password" minlength="8" required />
+            </div>
+            <div class="error-text" id="reg-error"></div>
+            <button class="btn btn-primary" style="width:100%" type="submit" id="reg-btn">Daftar Sekarang</button>
+            <p class="center small mt-1 muted">Sudah punya akun? <a href="#" onclick="Auth.switchTab('login');return false">Login di sini</a></p>
+          </form>
+
+          <!-- FORGOT -->
+          <form id="form-forgot" class="hidden" onsubmit="return Auth.forgot(event)">
+            <div class="info-box">Masukkan email Gmail yang terdaftar. Kami akan kirim link untuk reset password.</div>
+            <div class="form-group">
+              <label>Email (Gmail) <span class="req">*</span></label>
+              <input type="email" id="forgot-email" placeholder="nama@gmail.com" required />
+            </div>
+            <div class="error-text" id="forgot-error"></div>
+            <button class="btn btn-primary" style="width:100%" type="submit" id="forgot-btn">Kirim Link Reset</button>
+            <p class="center small mt-1 muted"><a href="#" onclick="Auth.switchTab('login');return false">← Kembali ke Login</a></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: USER DASHBOARD ============ -->
+  <main id="view-user" class="view">
+    <div class="page-wrap">
+      <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+        <div class="dash-layout">
+          <aside class="dash-side">
+            <div class="center mb-2">
+              <div class="logo-text">LP<span>TANI</span></div>
+              <p class="muted small mt-1" id="user-greeting">Halo, Member</p>
+            </div>
+            <ul class="dash-menu" id="user-menu">
+              <li><button class="active" data-user-panel="overview" onclick="UserDash.showPanel('overview')">🏠 Dashboard</button></li>
+              <li><button data-user-panel="join" onclick="UserDash.showPanel('join')">🌱 Join Member</button></li>
+              <li><button data-user-panel="payment" onclick="UserDash.showPanel('payment')">🧾 Konfirmasi Pembayaran</button></li>
+              <li><button data-user-panel="mentoring" onclick="UserDash.showPanel('mentoring')">🎓 Mentoring</button></li>
+              <li><button data-user-panel="upgrade" onclick="UserDash.showPanel('upgrade')">⭐ Upgrade VIP</button></li>
+              <li><button data-user-panel="password" onclick="UserDash.showPanel('password')">🔑 Ganti Password</button></li>
+              <li><button onclick="Auth.logout()">🚪 Logout</button></li>
+            </ul>
+          </aside>
+          <div class="dash-main">
+            <!-- OVERVIEW -->
+            <div class="dash-panel active" id="user-panel-overview">
+              <h2 class="mb-2">🏠 Dashboard Member</h2>
+              <div class="grid-2" id="user-overview-cards"></div>
+              <div class="card mt-2" id="user-discord-card"></div>
+            </div>
+
+            <!-- JOIN MEMBER -->
+            <div class="dash-panel" id="user-panel-join">
+              <h2 class="mb-2">🌱 Join Member</h2>
+              <div id="user-join-status"></div>
+              <div id="user-join-benefits"></div>
+              <form id="user-join-form" class="hidden" onsubmit="return UserDash.submitJoin(event)">
+                <div class="form-group">
+                  <label>ID Discord <span class="req">*</span></label>
+                  <input type="text" id="join-discord-id" placeholder="contoh: lptani123" required />
+                  <div class="hint">Cara melihat ID Discord: buka Discord → klik ikon ⚙️ (User Settings) di kiri bawah → klik profil kamu → ID Discord tertera di bawah nama (bukan display name, tapi username unik dengan # atau tanpa #). Aktifkan Developer Mode jika perlu: Settings → Advanced → Developer Mode, lalu klik kanan profil kamu → Copy User ID.</div>
+                </div>
+                <div class="form-group">
+                  <label>Pilih Paket Member <span class="req">*</span></label>
+                  <div class="grid-2" id="user-tier-cards"></div>
+                </div>
+                <div class="form-group">
+                  <label>Metode Pembayaran <span class="req">*</span></label>
+                  <div id="user-payment-methods" class="grid-2"></div>
+                </div>
+                <div class="form-group">
+                  <label>🎟️ Kode Promo / Voucher <span class="muted small">(opsional — boleh dikosongkan)</span></label>
+                  <div class="flex" style="gap:0.5rem;flex-wrap:wrap">
+                    <input type="text" id="join-promo-code" placeholder="Masukkan kode promo" style="text-transform:uppercase;max-width:280px" />
+                    <button class="btn btn-outline" type="button" id="join-promo-apply" onclick="UserDash.applyPromo()">Terapkan</button>
+                  </div>
+                  <div class="hint" id="join-promo-msg" style="display:none"></div>
+                </div>
+                <div id="join-invoice"></div>
+                <div class="checkbox-row">
+                  <input type="checkbox" id="join-snk" />
+                  <label for="join-snk">Saya sudah membaca dan menyetujui <a href="#" onclick="Legal.open('syarat'); return false;">Syarat & Ketentuan</a>, <a href="#" onclick="Legal.open('refund'); return false;">Kebijakan Refund</a>, dan <a href="#" onclick="Legal.open('risiko'); return false;">Disclaimer Risiko</a>.</label>
+                </div>
+                <div class="error-text" id="join-error"></div>
+                <button class="btn btn-primary" style="width:100%" type="submit" id="join-submit-btn">💰 Konfirmasi Pembayaran</button>
+              </form>
+              <div id="user-join-transactions" class="mt-2"></div>
+            </div>
+
+            <!-- KONFIRMASI PEMBAYARAN -->
+            <div class="dash-panel" id="user-panel-payment">
+              <h2 class="mb-2">🧾 Konfirmasi Pembayaran</h2>
+              <div id="payment-status-area"></div>
+              <div id="payment-list"></div>
+            </div>
+
+            <!-- MENTORING -->
+            <div class="dash-panel" id="user-panel-mentoring">
+              <h2 class="mb-2">🎓 Mentoring 1-on-1 (VIP)</h2>
+              <div id="mentoring-area"></div>
+            </div>
+
+            <!-- UPGRADE VIP -->
+            <div class="dash-panel" id="user-panel-upgrade">
+              <h2 class="mb-2">⭐ Upgrade ke VIP</h2>
+              <div id="upgrade-area"></div>
+            </div>
+
+            <!-- CHANGE PASSWORD -->
+            <div class="dash-panel" id="user-panel-password">
+              <h2 class="mb-2">🔑 Ganti Password</h2>
+              <form onsubmit="return UserDash.changePassword(event)">
+                <div class="form-group">
+                  <label>Password Baru <span class="req">*</span></label>
+                  <input type="password" id="new-pass" minlength="8" required />
+                </div>
+                <div class="form-group">
+                  <label>Ulangi Password Baru <span class="req">*</span></label>
+                  <input type="password" id="new-pass2" minlength="8" required />
+                </div>
+                <div class="error-text" id="pass-error"></div>
+                <button class="btn btn-primary" type="submit">Simpan Password Baru</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: ADMIN DASHBOARD ============ -->
+  <main id="view-admin" class="view">
+    <div class="page-wrap">
+      <div class="container" style="padding-top:2rem;padding-bottom:4rem">
+        <div class="dash-layout">
+          <aside class="dash-side">
+            <div class="center mb-2">
+              <div class="logo-text">LP<span>TANI</span></div>
+              <p class="muted small">Admin Panel</p>
+            </div>
+            <ul class="dash-menu" id="admin-menu">
+              <li><button class="active" data-admin-panel="overview" onclick="AdminDash.showPanel('overview')">📊 Ringkasan</button></li>
+              <li><button data-admin-panel="users" onclick="AdminDash.showPanel('users')">👥 Manage User</button></li>
+              <li><button data-admin-panel="transactions" onclick="AdminDash.showPanel('transactions')">🧾 Verifikasi Pembayaran</button></li>
+              <li><button data-admin-panel="mentoring" onclick="AdminDash.showPanel('mentoring')">🎓 Manage Mentoring</button></li>
+              <li><button data-admin-panel="content" onclick="AdminDash.showPanel('content')">📝 CRUD Content</button></li>
+              <li><button data-admin-panel="terms" onclick="AdminDash.showPanel('terms')">📜 Syarat & Ketentuan</button></li>
+              <li><button data-admin-panel="pnl" onclick="AdminDash.showPanel('pnl')">🖼️ PNL Image & Video</button></li>
+              <li><button data-admin-panel="payment-methods" onclick="AdminDash.showPanel('payment-methods')">🏦 Metode Pembayaran</button></li>
+              <li><button data-admin-panel="promo" onclick="AdminDash.showPanel('promo')">🎟️ Promo / Voucher</button></li>
+              <li><button data-admin-panel="settings" onclick="AdminDash.showPanel('settings')">⚙️ Pengaturan</button></li>
+              <li><button data-admin-panel="password" onclick="AdminDash.showPanel('password')">🔑 Password</button></li>
+              <li><button onclick="Auth.logout()">🚪 Logout</button></li>
+            </ul>
+          </aside>
+          <div class="dash-main">
+            <div class="dash-panel active" id="admin-panel-overview"><h2 class="mb-2">📊 Ringkasan</h2><div id="admin-overview-content"></div></div>
+            <div class="dash-panel" id="admin-panel-users"><h2 class="mb-2">👥 Manage User</h2><div id="admin-users-content"></div></div>
+            <div class="dash-panel" id="admin-panel-transactions"><h2 class="mb-2">🧾 Verifikasi Pembayaran</h2><div id="admin-transactions-content"></div></div>
+            <div class="dash-panel" id="admin-panel-mentoring"><h2 class="mb-2">🎓 Manage Mentoring</h2><div id="admin-mentoring-content"></div></div>
+            <div class="dash-panel" id="admin-panel-content"><h2 class="mb-2">📝 CRUD Content</h2><div id="admin-content-content"></div></div>
+            <div class="dash-panel" id="admin-panel-terms"><h2 class="mb-2">📜 Syarat & Ketentuan</h2><div id="admin-terms-content"></div></div>
+            <div class="dash-panel" id="admin-panel-pnl"><h2 class="mb-2">🖼️ PNL Image & Video</h2><div id="admin-pnl-content"></div></div>
+            <div class="dash-panel" id="admin-panel-payment-methods"><h2 class="mb-2">🏦 Metode Pembayaran</h2><div id="admin-pm-content"></div></div>
+            <div class="dash-panel" id="admin-panel-promo"><h2 class="mb-2">🎟️ Promo / Voucher</h2><div id="admin-promo-content"></div></div>
+            <div class="dash-panel" id="admin-panel-settings"><h2 class="mb-2">⚙️ Pengaturan</h2><div id="admin-settings-content"></div></div>
+            <div class="dash-panel" id="admin-panel-password"><h2 class="mb-2">🔑 Password Admin</h2><div id="admin-password-content"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ MODAL ROOT ============ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal-box"></div>
+  </div>
+
+  <!-- ============ LIGHTBOX (zoom PNL) ============ -->
+  <div class="lightbox-overlay" id="lightbox-overlay"></div>
+
+  <!-- ============ TOASTS ============ -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ============ FIREBASE SDK (compat CDN) ============ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+  <!-- ============ APP SCRIPTS ============ -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/legal.js"></script>
+  <script src="js/landing.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/bootstrap.js"></script>
+</body>
+</html>
