@@ -36,7 +36,10 @@ function initAuthListener() {
     try {
       if (!user) {
         renderNavAuth(false);
-        if (Router.current === "user" || Router.current === "admin") Router.go("landing");
+        if (Router.current === "user" || Router.current === "admin") {
+          Router.go("landing");
+          Toast.show("Sesi berakhir. Silakan login ulang.", "info", 6000);
+        }
         return;
       }
       const data = await ensureUserDoc(user);

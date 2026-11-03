@@ -64,9 +64,14 @@ const Modal = {
          <button class="btn ${danger ? "btn-danger" : "btn-primary"}" id="modal-confirm-ok">${okText}</button>
        </div>`
     );
-    document.getElementById("modal-confirm-ok").onclick = () => {
+    document.getElementById("modal-confirm-ok").onclick = async () => {
       this.close();
-      onOk();
+      try {
+        await onOk();
+      } catch (e) {
+        console.error(e);
+        Toast.show("Gagal menyimpan: " + (e && e.message ? e.message : "terjadi kesalahan"), "error", 6000);
+      }
     };
   },
   prompt({ title, fields = [], okText = "Simpan", onOk }) {
@@ -99,6 +104,7 @@ const Modal = {
       const errEl = document.getElementById("modal-form-error");
       const values = [];
       for (let i = 0; i < fields.length; i++) {
+        const f = fields[i];
         const el = document.getElementById(`modal-f-${i}`);
         if (!el) continue;
         if (f.type !== "checkbox" && el.checkValidity && !el.checkValidity()) {
@@ -116,7 +122,12 @@ const Modal = {
         errEl.textContent = m;
         errEl.style.display = "block";
       };
-      onOk(values, done, fail);
+      try {
+        const r = onOk(values, done, fail);
+        if (r && typeof r.catch === "function") r.catch((e) => fail((e && e.message) || "Terjadi kesalahan."));
+      } catch (e) {
+        fail((e && e.message) || "Terjadi kesalahan.");
+      }
     };
   },
 };
