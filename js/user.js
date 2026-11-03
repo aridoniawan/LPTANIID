@@ -106,7 +106,7 @@ const UserDash = {
   },
 
   /* ============ JOIN MEMBER ============ */
-  renderJoin() {
+  async renderJoin() {
     const u = this.user;
     const area = document.getElementById("user-join-status");
     const form = document.getElementById("user-join-form");
@@ -118,21 +118,35 @@ const UserDash = {
     if (!open) {
       area.innerHTML = `<div class="info-box warn">⏸️ Pendaftaran member sedang ditutup sementara oleh admin.</div>`;
       form.classList.add("hidden");
-    } else if (isMember && !expired) {
+      this.renderJoinTransactions();
+      return;
+    }
+    if (isMember && !expired) {
       area.innerHTML = `<div class="info-box">✅ Kamu sudah terdaftar sebagai member <b>${u.membership.toUpperCase()}</b>.${u.membership === "premium" ? " Mau lebih maksimal? Upgrade ke <b>VIP</b> di menu Upgrade." : ""}</div>`;
       form.classList.add("hidden");
-    } else {
-      area.innerHTML = expired
-        ? `<div class="info-box warn">Masa member kamu sudah habis. Silakan join member lagi di bawah.</div>`
-        : `<div class="info-box">Pilih paket member dan metode pembayaran, lalu konfirmasi pembayaran. Setelah admin approve, kamu bisa join Discord.</div>`;
-      form.classList.remove("hidden");
-      this.renderBenefits();
-      this.renderTierCards();
-      this.renderPaymentMethods();
-      this.renderInvoice();
+      this.renderJoinTransactions();
+      return;
     }
 
-    this.renderJoinTransactions();
+    let txs = [];
+    try {
+      txs = await getUserTransactions(u.uid);
+    } catch (e) {
+      txs = [];
+    }
+    const pendingJoins = txs.filter((t) => t.type === "join" && t.status === "pending");
+    const pendingNote = pendingJoins.length
+      ? `<div class="info-box warn mb-1">⏳ Request join menunggu verifikasi: ${pendingJoins.map((t) => `<b>${(t.tier || "").toUpperCase()}</b> (ID ${t.id.slice(0, 8).toUpperCase()})`).join(", ")}. Upload bukti di menu <b>Konfirmasi Pembayaran</b>.</div>`
+      : "";
+    area.innerHTML = pendingNote + (expired
+      ? `<div class="info-box warn">Masa member kamu sudah habis. Silakan join member lagi di bawah.</div>`
+      : `<div class="info-box">Pilih paket member dan metode pembayaran, lalu konfirmasi pembayaran. Setelah admin approve, kamu bisa join Discord.</div>`);
+    form.classList.remove("hidden");
+    this.renderBenefits();
+    this.renderTierCards();
+    this.renderPaymentMethods();
+    this.renderInvoice();
+    this.renderJoinTransactions(txs);
   },
 
   renderBenefits() {
@@ -379,6 +393,28 @@ const UserDash = {
     }
     const method = this.paymentMethods.find((p) => p.id === this.selectedMethod);
 
+    // Maksimal 1x request join per paket; member aktif tidak bisa request join lagi
+    const isMember = this.user.membership && this.user.membership !== "none";
+    const daysLeft = Helpers.daysLeft(this.user.membershipExpiry);
+    const memberExpired = this.user.membershipExpiry && daysLeft !== null && daysLeft <= 0;
+    if (isMember && !memberExpired) {
+      errEl.textContent = "Kamu sudah menjadi member. Tidak perlu request join lagi — bila ingin naik paket, gunakan menu Upgrade.";
+      errEl.style.display = "block";
+      return false;
+    }
+    let myTxs = [];
+    try {
+      myTxs = await getUserTransactions(this.user.uid);
+    } catch (e) {
+      myTxs = [];
+    }
+    const existingJoin = myTxs.find((t) => t.type === "join" && t.tier === this.selectedTier && t.status === "pending");
+    if (existingJoin) {
+      errEl.textContent = `Kamu sudah punya request join ${this.selectedTier.toUpperCase()} yang menunggu verifikasi (ID ${existingJoin.id.slice(0, 8).toUpperCase()}). Cek menu Konfirmasi Pembayaran.`;
+      errEl.style.display = "block";
+      return false;
+    }
+
     // Re-validasi promo sebelum transaksi dibuat (mencegah kode kedaluwarsa/habis kuota)
     if (this.appliedPromo) {
       let fresh = null;
@@ -448,10 +484,10 @@ const UserDash = {
     return false;
   },
 
-  async renderJoinTransactions() {
+  async renderJoinTransactions(existingTxs) {
     const wrap = document.getElementById("user-join-transactions");
     if (!this.user) return;
-    const txs = await getUserTransactions(this.user.uid);
+    const txs = existingTxs || (await getUserTransactions(this.user.uid));
     if (!txs.length) {
       wrap.innerHTML = "";
       return;
@@ -522,7 +558,7 @@ const UserDash = {
       : `Hubungi admin untuk info rekening tujuan, lalu transfer tepat sebesar <b>${Helpers.fmtIDR(t.amount)}</b>.`;
     Modal.open(
       `<h3>🧾 Invoice Transaksi</h3>
-       <div class="info-box mt-2">ID Transaksi: <b style="letter-spacing:0.08em">${t.id.slice(0, 8).toUpperCase()}</b> &nbsp;·&nbsp; ${Helpers.statusBadge(t.status)}</div>
+       <div class="info-box mt-2">ID Transaksi: <b style="letter-spacing:0.08em">${txId.slice(0, 8).toUpperCase()}</b> &nbsp;·&nbsp; ${Helpers.statusBadge(t.status)}</div>
        <div class="card invoice-box mt-2">
          <div class="invoice-row"><span>Paket: <b>${pkg}</b></span><span>${Helpers.fmtIDR(base)}</span></div>
          ${t.promoCode ? `<div class="invoice-row"><span>🎟️ Diskon <b>${Helpers.esc(t.promoCode)}</b>${t.promoType ? ` (${t.promoType === "fixed" ? Helpers.fmtIDR(t.promoValue) : Number(t.promoValue) + "%"})` : ""}</span><span style="color:var(--neon-dark)">−${Helpers.fmtIDR(discount)}</span></div>` : ""}
